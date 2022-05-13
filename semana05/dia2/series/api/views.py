@@ -1,3 +1,4 @@
+from msilib.schema import Class
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -24,3 +25,25 @@ class SeriesView(APIView):
         serSerie.save()
 
         return Response(serSerie.data)
+
+class SerieDetailView(APIView):
+    def get(self,request,serie_id):
+        dataSerie = Series.objects.get(pk=serie_id)
+        serSerie = SerieSerializer(dataSerie)
+        return Response(serSerie.data)
+
+    def put(self,request,serie_id):
+        dataSerie = Series.objects.get(pk=serie_id)
+        serSerie = SerieSerializer(dataSerie,data=request.data)
+        serSerie.is_valid(raise_exception=True)
+        serSerie.save()
+        return Response(serSerie.data)
+    
+    def delete(self,request,serie_id):
+        dataSerie = Series.objects.get(pk=serie_id)
+        serSerie = SerieSerializer(dataSerie)
+        dataSerie.delete()
+        return Response(serSerie.data)
+
+
+        
