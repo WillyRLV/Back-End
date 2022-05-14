@@ -1,4 +1,8 @@
+from email.policy import default
 from django.db import models
+
+#importamos cloudinary
+from cloudinary.models import CloudinaryField
 
 # Create your models here.
 class Mesa(models.Model):
@@ -19,7 +23,7 @@ class Categoria(models.Model):
 class Plato(models.Model):
     plato_id = models.AutoField(primary_key=True)
     plato_nom = models.CharField(max_length=200,verbose_name='nombre')
-    plato_img = models.CharField(max_length=255)
+    plato_img = CloudinaryField('image',default='')
     plato_pre = models.DecimalField(max_digits=10,decimal_places=2,default=0,
                                     verbose_name='precio')
     categoria_id = models.ForeignKey(Categoria,related_name='Platos',
