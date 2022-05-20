@@ -77,10 +77,10 @@ WSGI_APPLICATION = 'shop.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'db_shop',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
+        'NAME': 'b9ptqhkr09aw81qpjf4u',
+        'USER': 'u7rdgycgx3lys1gp',
+        'PASSWORD': '9BkVw1v2STluuBQ96qtk',
+        'HOST': 'b9ptqhkr09aw81qpjf4u-mysql.services.clever-cloud.com',
         'PORT': '3306',
     }
 }
