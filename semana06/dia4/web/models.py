@@ -1,4 +1,3 @@
-from pyexpat import model
 from django.db import models
 
 ##====
@@ -38,8 +37,21 @@ class Cliente(models.Model):
 
 ##modelo pedido
 class Pedido(models.Model):##al haber una relacion de muchos a muchos no se menciona en un model
+#para colocar con diferentes estados y restringa (2.
+    SOLICITADO = 'solicitado'
+    PAGADO= 'pagado'
+
+    ESTADO_CHOICES = (
+            (SOLICITADO, 'solicitado'),
+            (PAGADO, 'pagado')
+    )
+
     cliente = models.ForeignKey(Cliente,on_delete=models.RESTRICT)
     fecha_reg = models.DateTimeField(auto_now_add=True)
+##AÑADIMOS UN ESTADO(paypal) (1.
+    estado = models.CharField(max_length=20,default='solicitado',choices=ESTADO_CHOICES)
+    nro_recibo = models.CharField(max_length=200,default='')
+    total = models.DecimalField(max_digits=10,decimal_places=2,default=0)
 
     def __str__(self):
         return str(self.fecha_reg)

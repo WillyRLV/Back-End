@@ -37,7 +37,9 @@ path('cuenta',views.cuentaUsuario,name='cuentaUsuario'),
 path('actualizarCliente',views.actualizarCliente,name='actualizarCliente'),
 
 ##registrar pedidos
-path('registrarPedido',views.registrarPedido,name='registrarPedido')
+path('registrarPedido',views.registrarPedido,name='registrarPedido'),
 
+##registrarpeiddo pagado
+path('pedidopagado',views.pedidopagado,name='pedidopagado')
 
 ]

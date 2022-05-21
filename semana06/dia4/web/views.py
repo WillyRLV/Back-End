@@ -1,4 +1,3 @@
-import re
 from django.shortcuts import render,redirect
 
 
@@ -192,33 +191,87 @@ def actualizarCliente(request):
 ########### PEDIDOS ########################
 from .models import Pedido,PedidoDetalle
 
+##IMPORT DE PAYPAL=======================
+from django.conf import settings
+from paypal.standard.forms import PayPalPaymentsForm
+##=================================
+
 def registrarPedido(request):
     if request.user.id is not None:
         #registra cabecera del pedido
-        clientePedido = Cliente.objects.get(usuario=request.user)
-        nuevoPedido = Pedido()
-        nuevoPedido.cliente = clientePedido
-        nuevoPedido.save()
+        try:
+            clientePedido = Cliente.objects.get(usuario=request.user)
+            nuevoPedido = Pedido()
+            nuevoPedido.cliente = clientePedido
+            nuevoPedido.save()
 
-        #registra detalle del pedido
-        carritoPedido = request.session.get("cart")
-        for key,value in carritoPedido.items():
+            #registra detalle del pedido
+            carritoPedido = request.session.get("cart")
 
-            productoPedido = Producto.objects.get(pk=value["producto_id"])
+            ##variable para paypal=========================
+            totalPedido=0
+            #====================
+            for key,value in carritoPedido.items():
 
-            nuevoPedidoDetalle = PedidoDetalle()
-            nuevoPedidoDetalle.pedido = nuevoPedido
-            nuevoPedidoDetalle.producto = productoPedido
-            nuevoPedidoDetalle.cantidad = int(value["cantidad"])
-            nuevoPedidoDetalle.save()
+                productoPedido = Producto.objects.get(pk=value["producto_id"])
 
-        carrito = Cart(request)
-        carrito.clear()
+                nuevoPedidoDetalle = PedidoDetalle()
+                nuevoPedidoDetalle.pedido = nuevoPedido
+                nuevoPedidoDetalle.producto = productoPedido
+                nuevoPedidoDetalle.cantidad = int(value["cantidad"])
+                nuevoPedidoDetalle.save()
+                totalPedido += float(value["cantidad"])*float(productoPedido.precio)
 
-        return render(request,'gracias.html')
+            ##registramos el total de pedido y generamos el boton de paypal
+            nuevoPedido.total = totalPedido
+            nuevoPedido.save()
+            ###============================================================
+
+            ###boton paypal
+            request.session['paypal_id']=nuevoPedido.id
+            host = request.get_host()
+
+            paypal_datos = {
+                'business':settings.PAYPAL_RECEIVER_EMAIL,
+                'amount':totalPedido,
+                'item_name':'PEDIDO #' + str(nuevoPedido.id),
+                'invoice': str(nuevoPedido.id),
+                'notify_url':'http://' + host + '/' + 'paypal-ipn',
+                'return_url':'http://' + host + '/' + 'pedidopagado'
+            }
+            formPedidoPaypal = PayPalPaymentsForm(initial=paypal_datos)
+
+            context = {
+                    'pedido':nuevoPedido,
+                    'formpaypal':formPedidoPaypal
+                }
+
+
+            carrito = Cart(request)
+            carrito.clear()
+
+            return render(request,'pago.html',context)
+        except:
+            return redirect('/login')
 
     else:
         return redirect('/login')
+
+
+
+
+def pedidopagado(request):
+    pedidoID = request.session.get("paypal_id")
+    nroRecibo = request.GET.get('PayerID','')
+    print("nro de recibo paypal:" + nroRecibo)
+    print("id de pedido : " + str(pedidoID))
+    pedidoEditar = Pedido.objects.get(pk=pedidoID)
+    pedidoEditar.estado = 'pagado'
+    pedidoEditar.nro_recibo = nroRecibo
+    pedidoEditar.save()
+
+    return render(request,'gracias.html')
+
 
             
         
